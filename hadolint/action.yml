@@ -1,6 +1,5 @@
-name: "Hadolint template"
-description: "Hadolint test custom action"
-
+name: 'Hadolint Action'
+description: 'Action that runs Hadolint Dockerfile linting tool'
 inputs:
   docker_file:
     description: "Name of the dockerfile"
