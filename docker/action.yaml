@@ -34,25 +34,42 @@ runs:
       uses: docker/build-push-action@v5
       with:
         context: "{{defaultContext}}:${{ inputs.folder_name}}"
-        push: true
         tags: '${{ inputs.dockerhub_username }}/${{ inputs.image_name }}:${{ inputs.tags }}'
+        outputs: type=docker,dest=./${{ inputs.dockerhub_username }}/${{ inputs.image_name }}:${{ inputs.tags }}.tar
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+          name: '${{ inputs.dockerhub_username }}/${{ inputs.image_name }}:${{ inputs.tags }}'
+          path: ./${{ inputs.dockerhub_username }}/${{ inputs.image_name }}:${{ inputs.tags }}.tar
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+          name: '${{ inputs.dockerhub_username }}/${{ inputs.image_name }}:${{ inputs.tags }}'
+          path: ./
+    - name: Load image
+      shell: bash
+      run: |
+        docker load --input ./${{ inputs.dockerhub_username }}/${{ inputs.image_name }}:${{ inputs.tags }}.tar
+        docker image ls -a 
+
     - name: Image scanning usinf Trivy
       id: scan_image
       uses: aquasecurity/trivy-action@0.16.1
       with:
-        image-ref: '${{ inputs.dockerhub_username }}/${{ inputs.image_name }}:${{ inputs.tags }}'
+        image-ref: ./${{ inputs.dockerhub_username }}/${{ inputs.image_name }}:${{ inputs.tags }}
         format: 'table'
         exit-code: '1'
         ignore-unfixed: true
         vuln-type: 'os,library'
         severity: 'CRITICAL,HIGH'
-    # - name: Push image
-    #   if: ${{ success() }}
-    #   uses: docker/build-push-action@v5
-    #   with:
-    #     context: "{{defaultContext}}:${{ inputs.folder_name}}"
-    #     push: true
-    #     tags: '${{ inputs.dockerhub_username }}/${{ inputs.image_name }}:${{ inputs.tags }}'      
+    - name: Push image
+      if: ${{ success() }}
+      uses: docker/build-push-action@v5
+      with:
+        context: "{{defaultContext}}:${{ inputs.folder_name}}"
+        push: true
+        tags: '${{ inputs.dockerhub_username }}/${{ inputs.image_name }}:${{ inputs.tags }}'      
 
         
         
