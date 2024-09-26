@@ -5,6 +5,18 @@ Scans container images for vulnerabilities with Trivy and pushed image to docker
 <!-- action-docs-description action="action.yml" -->
 
 <!-- action-docs-inputs action="action.yml" -->
+## Usage
+
+Add the following step to your workflow configuration:
+
+```yml
+steps:
+  - uses: actions/checkout@v3
+  - uses: huzafach/hadolint@vmain
+    with:
+      dockerfile: Dockerfile
+```
+
 ## Inputs
 
 | name | description | required | default |
